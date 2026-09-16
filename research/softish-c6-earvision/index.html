@@ -450,13 +450,17 @@
     </figure>
     <p>
       Two properties of this chain are worth stating plainly. First, the
-      most severe outcome — arbitrary firmware execution — requires the least
-      technical sophistication of any step, because §4.2 and §4.3 do all the
-      work of getting the attacker into position; the final step is a JSON
-      field and a UDP send. Second, the video-interception branch (§4.1)
-      needs no chain at all — it is independently exploitable by anyone who
-      captures the AP handshake or derives the password, with zero
-      interaction with the app or its user.
+      step with the largest technical consequence — arbitrary firmware
+      execution — requires the least technical sophistication of any step in
+      the chain, because §4.2 and §4.3 do all the work of getting the
+      attacker into position; the final step is a JSON field and a UDP send.
+      This is a different measure than the CVSS ranking in Table 2:
+      CVE-2026-81640 scores highest because it needs no user interaction and
+      no prior access whatsoever, while CVE-2026-77974 is what actually hands
+      the attacker persistent code execution on the device. Second, the
+      video-interception branch (§4.1) needs no chain at all — it is
+      independently exploitable by anyone who captures the AP handshake or
+      derives the password, with zero interaction with the app or its user.
     </p>
   </section>
 
