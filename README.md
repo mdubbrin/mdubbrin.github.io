@@ -1,6 +1,6 @@
 # mdubbrin.github.io
 
-Personal site and research index for Matthew Dubbrin, served via GitHub Pages
+Personal site served via GitHub Pages
 at https://mdubbrin.github.io.
 
 - `index.html` — homepage
