@@ -5,44 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Research</title>
 <meta name="description" content="Security research and CVE disclosure write-ups by Matthew Dubbrin.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Source+Serif+4:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
 <style>
-  :root{
-    --paper:#f6f7f6; --ink:#171b1a; --ink-soft:#4c5957; --rule:#d8e0de; --accent:#0b6e75;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --paper:#12191a; --ink:#e7ece9; --ink-soft:#aebdb8; --rule:#2a3736; --accent:#5cc6cc; }
-  }
-  *{box-sizing:border-box;}
-  body{
-    background:var(--paper); color:var(--ink); margin:0;
-    font-family:"Source Serif 4", Georgia, serif;
-  }
-  main{ max-width:640px; margin:0 auto; padding:56px 20px 60px; }
-  a.back{
-    font-family:"IBM Plex Mono", monospace; font-size:12.5px; color:var(--ink-soft);
-    text-decoration:none;
-  }
-  a.back:hover{ color:var(--accent); }
-  h1{ font-family:"Fraunces", serif; font-weight:600; font-size:clamp(26px,5vw,34px); margin:18px 0 32px; }
-  ul{ list-style:none; margin:0; padding:0; }
-  li{
-    border-top:1px solid var(--rule);
-    padding:20px 0;
-  }
-  li:last-child{ border-bottom:1px solid var(--rule); }
-  li a.title{
-    font-family:"Fraunces", serif; font-weight:600; font-size:19px;
-    color:var(--ink); text-decoration:none;
-  }
-  li a.title:hover{ color:var(--accent); }
-  li .meta{
-    font-family:"IBM Plex Mono", monospace; font-size:11.5px; letter-spacing:.03em;
-    text-transform:uppercase; color:var(--accent); display:block; margin-bottom:6px;
-  }
-  li p{ color:var(--ink-soft); font-size:14.5px; margin:8px 0 0; max-width:62ch; }
+  main.wrap ul{ list-style:none; margin:0; padding:0; }
+  main.wrap li{ border-top:1px dotted var(--rule); padding:1.4rem 0; }
+  main.wrap li:last-child{ border-bottom:1px dotted var(--rule); }
+  main.wrap li a.title{ font-weight:700; font-size:1rem; color:var(--fg); }
+  main.wrap li p{ color:var(--fg-dim); font-size:.85rem; margin:.6rem 0 0; max-width:62ch; }
 </style>
 </head>
 <body>
@@ -58,11 +27,11 @@
     </nav>
   </div>
 </header>
-<main>
-  <h1>Research</h1>
+<main class="wrap">
+  <h1 class="page-title">Research</h1>
   <ul>
     <li>
-      <span class="meta">Case Study &middot; CERT/CC VU#763563 &middot; 16 Sep 2026</span>
+      <span class="meta">Case Study &middot; CERT/CC VU#763563 &middot; 16 Sep 2026</span><br>
       <a class="title" href="softish-c6-earvision/">Insecure by Design: Four Chained CVEs in a Consumer Otoscope Camera</a>
       <p>
         Four coordinated CVEs (CVE-2026-81330, -81640, -82563, -77974) in the
@@ -73,5 +42,6 @@
     </li>
   </ul>
 </main>
+<footer class="sitefoot">mdubbrin.github.io</footer>
 </body>
 </html>
