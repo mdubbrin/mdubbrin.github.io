@@ -1,0 +1,1149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Insecure by Design — Matthew Dubbrin</title>
+<meta name="description" content="Four chained CVEs (CERT/CC VU#763563) in the Softish C6 ear camera and EarVision app.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,400..700,0..1&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..500&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#f6f7f6;
+  --surface:#ffffff;
+  --ink:#171b1a;
+  --ink-soft:#4c5957;
+  --ink-faint:#7c8b88;
+  --rule:#d8e0de;
+  --rule-strong:#b9c6c3;
+  --accent:#0b6e75;
+  --accent-soft:#e2eeee;
+  --critical:#b42318;
+  --critical-soft:#fbe9e7;
+  --high:#a15c07;
+  --high-soft:#fbf0dd;
+  --shadow: 0 1px 2px rgba(20,30,29,.06), 0 8px 24px -12px rgba(20,30,29,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#12191a;
+    --surface:#1a2223;
+    --ink:#e7ece9;
+    --ink-soft:#aebdb8;
+    --ink-faint:#7f918c;
+    --rule:#2a3736;
+    --rule-strong:#3a4b49;
+    --accent:#5cc6cc;
+    --accent-soft:#193637;
+    --critical:#f6968c;
+    --critical-soft:#3a2220;
+    --high:#f0b962;
+    --high-soft:#382d16;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.55);
+  }
+}
+
+*{box-sizing:border-box;}
+html{ background:var(--paper); }
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Source Serif 4", Georgia, "Times New Roman", serif;
+  font-size:17px;
+  line-height:1.6;
+  margin:0;
+  padding-block: 24px 96px;
+}
+::selection{ background:var(--accent-soft); }
+
+.sheet{
+  max-width: 760px;
+  margin: 0 auto;
+  padding-inline: 16px;
+}
+
+a.back{
+  display:inline-block;
+  font-family:"IBM Plex Mono", monospace;
+  font-size:12.5px;
+  color:var(--ink-soft);
+  text-decoration:none;
+  margin-bottom: 22px;
+}
+a.back:hover{ color:var(--accent); }
+
+/* ---------- Masthead ---------- */
+.masthead{
+  border-bottom: 1.5px solid var(--rule-strong);
+  padding-bottom: 28px;
+  margin-bottom: 34px;
+}
+.case-no{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items:center;
+  margin-bottom: 18px;
+}
+.case-no .sep{ color: var(--rule-strong); }
+h1.title{
+  font-family:"Fraunces", "Source Serif 4", serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(28px, 5vw, 42px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+  text-wrap: balance;
+}
+p.subtitle{
+  font-family:"Fraunces", serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ink-soft);
+  font-size: 19px;
+  margin: 0 0 22px;
+  text-wrap: balance;
+}
+.byline{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 4px 22px;
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+.byline strong{ color: var(--ink); font-weight:600; }
+
+/* ---------- Abstract / keywords ---------- */
+.abstract{
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 22px 24px;
+  margin: 30px 0 20px;
+  box-shadow: var(--shadow);
+}
+.abstract .label{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+  display:block;
+}
+.abstract p{ margin:0; font-size:15.5px; color:var(--ink-soft); }
+.abstract p + p{ margin-top: 10px; }
+
+.keywords{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin: 0 0 8px;
+}
+.keywords .label{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color: var(--ink-faint);
+  align-self:center;
+  margin-right:4px;
+}
+.kw{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  border:1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+/* ---------- At a glance ---------- */
+.glance{
+  margin: 26px 0 6px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow:hidden;
+}
+.glance table{ width:100%; border-collapse:collapse; }
+.glance td{
+  padding: 9px 14px;
+  font-size: 14.5px;
+  border-top: 1px solid var(--rule);
+  vertical-align: top;
+}
+.glance tr:first-child td{ border-top:none; }
+.glance td:first-child{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  letter-spacing:.03em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  width: 34%;
+  white-space:nowrap;
+}
+
+/* ---------- Contents ---------- */
+.toc{
+  margin: 34px 0 8px;
+  padding: 18px 22px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: 3px;
+}
+.toc .label{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  display:block;
+  margin-bottom: 10px;
+}
+.toc ol{
+  columns: 2;
+  column-gap: 28px;
+  margin:0; padding:0;
+  list-style:none;
+  counter-reset: toc;
+}
+.toc li{
+  break-inside: avoid;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.toc a{
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.toc a:hover{ color:var(--accent); border-bottom-color: var(--accent); }
+@media (max-width: 520px){ .toc ol{ columns:1; } }
+
+/* ---------- Sections ---------- */
+section{ margin-top: 52px; }
+section > h2{
+  font-family:"Fraunces", serif;
+  font-weight:600;
+  font-size: 25px;
+  letter-spacing:-.005em;
+  margin: 0 0 6px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--rule-strong);
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+}
+section > h2 .num{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:16px;
+  color: var(--accent);
+  font-weight:500;
+}
+h3{
+  font-family:"Fraunces", serif;
+  font-weight:600;
+  font-size: 19px;
+  margin: 30px 0 4px;
+}
+h3 .num{
+  font-family:"IBM Plex Mono", monospace;
+  color:var(--ink-faint);
+  font-weight:500;
+  margin-right:6px;
+  font-size:15px;
+}
+p{ margin: 12px 0; max-width: 68ch; }
+.lede{ font-size: 18px; color: var(--ink-soft); }
+strong{ color:var(--ink); }
+a{ color: var(--accent); }
+code, .mono{ font-family:"IBM Plex Mono", monospace; font-size: .89em; }
+code{
+  background: var(--accent-soft);
+  padding: .1em .35em;
+  border-radius: 3px;
+}
+sup.cite a{
+  text-decoration:none;
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* ---------- Pull quote (vendor language) ---------- */
+blockquote.vendor{
+  margin: 22px 0;
+  padding: 16px 20px;
+  border-left: 3px solid var(--rule-strong);
+  background: var(--surface);
+  font-family:"Fraunces", serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+blockquote.vendor cite{
+  display:block;
+  margin-top:8px;
+  font-family:"IBM Plex Mono", monospace;
+  font-style:normal;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  letter-spacing: .03em;
+}
+
+/* ---------- Finding cards ---------- */
+.finding{
+  margin-top: 40px;
+  padding-top: 26px;
+  border-top: 1px solid var(--rule);
+}
+.finding:first-of-type{ border-top:none; padding-top:0; }
+.idbar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+}
+.cveid{
+  font-family:"IBM Plex Mono", monospace;
+  font-weight:600;
+  font-size: 15px;
+  letter-spacing: .01em;
+}
+.badge{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight:600;
+}
+.badge.critical{ background:var(--critical-soft); color:var(--critical); }
+.badge.high{ background:var(--high-soft); color:var(--high); }
+.cvss{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+.cwe{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+.finding h3.ftitle{
+  margin: 0 0 14px;
+  font-size: 21px;
+}
+
+/* ---------- Tables ---------- */
+.datatable{
+  width:100%;
+  border-collapse:collapse;
+  margin: 16px 0 8px;
+  font-size: 14px;
+}
+.datatable caption{
+  text-align:left;
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+  caption-side: top;
+}
+.datatable th{
+  text-align:left;
+  font-family:"IBM Plex Mono", monospace;
+  font-weight:600;
+  font-size: 11.5px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color: var(--ink-soft);
+  border-bottom: 1.5px solid var(--rule-strong);
+  padding: 7px 10px;
+  white-space:nowrap;
+}
+.datatable td{
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align:top;
+}
+.datatable td.mono, .datatable td code{ font-size: 13px; }
+.tablewrap{ overflow-x:auto; }
+.datatable tr:last-child td{ border-bottom: 1.5px solid var(--rule-strong); }
+
+/* ---------- Figures ---------- */
+figure{
+  margin: 26px 0;
+  padding: 18px 16px 12px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+figure svg{ width:100%; height:auto; display:block; }
+figure text{ font-family:"IBM Plex Mono", monospace; }
+figcaption{
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  font-family:"IBM Plex Mono", monospace;
+}
+figcaption b{ color: var(--ink-soft); }
+
+/* ---------- Lists ---------- */
+ul.plain, ol.plain{ padding-left: 22px; }
+ul.plain li, ol.plain li{ margin: 8px 0; max-width:66ch; }
+ul.checklist{ list-style:none; padding-left:0; }
+ul.checklist li{
+  position:relative;
+  padding-left: 22px;
+  margin: 10px 0;
+  max-width: 64ch;
+}
+ul.checklist li::before{
+  content:"→";
+  position:absolute; left:0; top:0;
+  color: var(--accent);
+  font-family:"IBM Plex Mono", monospace;
+}
+
+/* ---------- Ethics box ---------- */
+.ethics{
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  padding: 20px 22px;
+  margin: 18px 0;
+}
+.ethics .label{
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color: var(--critical);
+  display:block;
+  margin-bottom: 10px;
+}
+
+/* ---------- References ---------- */
+.refs{ padding-left:0; list-style:none; counter-reset:ref; }
+.refs li{
+  counter-increment: ref;
+  position:relative;
+  padding-left: 34px;
+  margin-bottom: 10px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  max-width: 68ch;
+}
+.refs li::before{
+  content: "[" counter(ref) "]";
+  position:absolute; left:0; top:0;
+  font-family:"IBM Plex Mono", monospace;
+  color: var(--ink-faint);
+  font-size:12.5px;
+}
+.refs a{ word-break: break-word; }
+
+/* ---------- Footer / colophon ---------- */
+.colophon{
+  margin-top: 60px;
+  padding-top: 20px;
+  border-top: 1.5px solid var(--rule-strong);
+  font-family:"IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  gap: 8px 20px;
+}
+
+@media (max-width: 480px){
+  body{ font-size:16px; }
+  .glance td:first-child{ width:auto; }
+  section > h2{ font-size:22px; }
+}
+
+@media print{
+  body{ background:#fff; color:#000; padding-block:0; }
+  .toc{ display:none; }
+  a{ color:#000; text-decoration: underline; }
+}
+</style>
+</head>
+<body>
+<article class="sheet">
+
+  <a class="back" href="../">&larr; Research</a>
+
+  <header class="masthead">
+    <div class="case-no">
+      <span>CASE STUDY</span><span class="sep">·</span>
+      <span>CERT/CC VU#763563</span><span class="sep">·</span>
+      <span>4 CVEs</span>
+    </div>
+    <h1 class="title">Insecure by Design</h1>
+    <p class="subtitle">Four chained vulnerabilities in a consumer otoscope camera and its companion Android application</p>
+    <div class="byline">
+      <span><strong>Matthew Dubbrin</strong> — Vexel Foundation</span>
+      <span>16 September 2026</span>
+      <span>Coordinated disclosure, CERT/CC</span>
+    </div>
+  </header>
+
+  <div class="abstract">
+    <span class="label">Abstract</span>
+    <p>
+      The Softish C6 is a consumer ear-canal camera, sold under multiple white-label
+      brand names and controlled by an Android application, EarVision, over a
+      device-hosted Wi-Fi access point. We present four vulnerabilities discovered
+      through static analysis of the companion application and passive wireless
+      capture of the device's control and video protocol: cleartext transmission of
+      live video (CVE-2026-81330), an access-point credential algorithmically
+      derivable from a value broadcast in every beacon frame (CVE-2026-81640),
+      acceptance of an unauthenticated rogue access point as the genuine device
+      (CVE-2026-82563), and an unauthenticated, unsigned over-the-air firmware
+      update path (CVE-2026-77974). Individually, each is a familiar class of IoT
+      defect. Composed, they form a single passive-to-active chain: an attacker who
+      only reads beacon frames can recover the Wi-Fi credential, decrypt the video
+      feed, impersonate the device to the application, and — with one user
+      tap — deliver an arbitrary firmware image with no signature check. We argue
+      this chain is materially worse than the median IoT camera disclosure because
+      the data in transit is medical-adjacent, frequently depicts a minor, and
+      because no accountable vendor security contact could be established for the
+      product. All four issues were coordinated through CERT/CC under VU#763563.
+      Consistent with our exploit-code policy (§9), we withhold the credential
+      derivation routine, rogue-access-point implementation, and video
+      reconstruction tooling.
+    </p>
+  </div>
+
+  <div class="keywords">
+    <span class="label">Keywords</span>
+    <span class="kw">IoT security</span>
+    <span class="kw">medical device privacy</span>
+    <span class="kw">cleartext transmission</span>
+    <span class="kw">derivable credentials</span>
+    <span class="kw">authentication bypass</span>
+    <span class="kw">unsigned firmware</span>
+    <span class="kw">coordinated disclosure</span>
+  </div>
+
+  <div class="glance">
+    <table>
+      <tr><td>Affected product</td><td>Softish C6 ear camera (also sold under "Jegoat" and other white-label names) and the EarVision Android app</td></tr>
+      <tr><td>Vendor</td><td>Shenzhen Jiding Electronics Co., Ltd. — no dedicated security contact identified; the app's bundled privacy policy lists only a generic personal-provider email for privacy inquiries, no <code>security.txt</code>, no published vulnerability disclosure policy</td></tr>
+      <tr><td>App version</td><td>EarVision <span class="mono">v1.3.1</span> (versionCode 132) — Flutter/Dart, AOT-compiled, minSdk 24 / targetSdk 36</td></tr>
+      <tr><td>Firmware variants</td><td><span class="mono">bk7252n_251117</span> (Beken BK7252N) · <span class="mono">txw806_111</span> (TXW806) · <span class="mono">txw810_125</span> (TXW810)</td></tr>
+      <tr><td>Attacker position</td><td>Passive or active Wi-Fi range of the device or the paired phone</td></tr>
+      <tr><td>Required interaction</td><td>None for video interception or credential recovery; one prompt tap for the firmware-push stage</td></tr>
+      <tr><td>Coordination</td><td>CERT/CC, VU#763563 — CVEs published 2 September 2026</td></tr>
+    </table>
+  </div>
+
+  <nav class="toc">
+    <span class="label">Contents</span>
+    <ol>
+      <li><a href="#s1">1. Introduction</a></li>
+      <li><a href="#s2">2. System Architecture &amp; Threat Model</a></li>
+      <li><a href="#s3">3. Methodology</a></li>
+      <li><a href="#s4">4. Findings</a></li>
+      <li><a href="#s5">5. The Composite Attack Chain</a></li>
+      <li><a href="#s6">6. Related Work</a></li>
+      <li><a href="#s7">7. Coordinated Disclosure Timeline</a></li>
+      <li><a href="#s8">8. Recommendations</a></li>
+      <li><a href="#s9">9. Exploit-Code &amp; Ethics Statement</a></li>
+      <li><a href="#s10">10. Discussion: A Broader Pattern</a></li>
+      <li><a href="#s11">11. Conclusion</a></li>
+      <li><a href="#refs">References</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1. INTRODUCTION -->
+  <section id="s1">
+    <h2><span class="num">1</span> Introduction</h2>
+    <p class="lede">Most consumer IoT camera disclosures end with "an attacker can watch your living room." This one ends with an attacker watching inside a body cavity, on hardware marketed for use on children, secured by a password that is broadcast in the clear ten times a second.</p>
+    <p>
+      The Softish C6 is a handheld otoscope: a camera at the tip of a probe, a
+      Wi-Fi radio in the handle, and no cloud service in between. A companion
+      Android app, EarVision (package <code>com.atomath.wifi_camera</code>),
+      streams the feed live to the user's phone. The same reference hardware
+      ships under several storefront names — a typical arrangement for
+      white-label IoT — which is itself a contributing factor in the disclosure
+      difficulty documented in §7.
+    </p>
+    <p>
+      We treat this device as a case study rather than an isolated finding
+      because the four vulnerabilities we identified do not fail independently.
+      Each removes one control from the same trust boundary — transport,
+      credential, identity, and integrity, in that order — and each failure
+      makes the next one easier to reach. §5 formalizes this as a single
+      attack graph. The result is that an attacker's cost to go from "in radio
+      range" to "have pushed unsigned firmware to the device" is a passive
+      capture, an off-the-shelf microcontroller, and one social-engineering-free
+      tap on a prompt the legitimate update flow also produces.
+    </p>
+    <p>
+      What distinguishes this device from a generic security-camera advisory is
+      the sensitivity of the data in transit. The footage is ear-canal anatomy,
+      eardrum condition, and any hearing-assistive hardware the subject wears; the
+      product is marketed to parents as a way to check a child's ear at home
+      rather than book a clinician visit. We return to this point directly in §10,
+      but it motivates the severity framing used throughout this paper: we treat
+      confidentiality of the video channel as the anchor harm, not an
+      afterthought to the firmware-integrity finding.
+    </p>
+  </section>
+
+  <!-- 2. SYSTEM ARCHITECTURE -->
+  <section id="s2">
+    <h2><span class="num">2</span> System Architecture &amp; Threat Model</h2>
+    <p>
+      The C6 does not join the user's home network. It is its own access point:
+      the phone disconnects from whatever network it was previously on,
+      associates to the camera's SSID (of the form <code>softish-XXXXXX</code>,
+      where the suffix is derived from the device's BSSID), and the app speaks
+      to the device directly over two UDP ports. There is no broker, no cloud
+      relay, and — outside of the firmware images bundled in the APK itself —
+      no external infrastructure involved in normal operation at all.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 640 250" role="img" aria-label="Diagram: the C6 camera and the EarVision phone app exchange three flows over two UDP ports on a device-hosted Wi-Fi access point, with no encryption, authentication, or signing on any of them.">
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <polygon points="0 0, 7 3, 0 6" fill="currentColor"/>
+          </marker>
+        </defs>
+        <rect x="20" y="20" width="180" height="60" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="110" y="46" text-anchor="middle" font-size="12.5" fill="currentColor" font-weight="600">Softish C6</text>
+        <text x="110" y="62" text-anchor="middle" font-size="11" fill="currentColor">AP + camera</text>
+
+        <rect x="440" y="20" width="180" height="60" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="530" y="46" text-anchor="middle" font-size="12.5" fill="currentColor" font-weight="600">EarVision app</text>
+        <text x="530" y="62" text-anchor="middle" font-size="11" fill="currentColor">Android phone</text>
+
+        <line x1="200" y1="50" x2="440" y2="50" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="320" y="42" text-anchor="middle" font-size="10.5" fill="currentColor">802.11 softAP · WPA2-PSK (derived, §4.2)</text>
+
+        <rect x="18" y="108" width="604" height="118" rx="4" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="5 4"/>
+
+        <line x1="440" y1="132" x2="210" y2="132" stroke="currentColor" stroke-width="1.3" marker-end="url(#arrowhead)"/>
+        <text x="325" y="126" text-anchor="middle" font-size="10.5" fill="currentColor">UDP/61500 — opcodes 10 01·02·03·04</text>
+
+        <line x1="210" y1="166" x2="440" y2="166" stroke="currentColor" stroke-width="1.3" marker-end="url(#arrowhead)"/>
+        <text x="325" y="160" text-anchor="middle" font-size="10.5" fill="currentColor">UDP/61500 — JSON status + WEBP frames</text>
+
+        <line x1="210" y1="200" x2="440" y2="200" stroke="currentColor" stroke-width="1.3" marker-end="url(#arrowhead)"/>
+        <text x="325" y="194" text-anchor="middle" font-size="10.5" fill="currentColor">UDP/61501 — JPEG video frames</text>
+
+        <text x="325" y="216" text-anchor="middle" font-size="10.5" fill="var(--accent)" font-weight="600">no TLS · no authentication · no signing</text>
+      </svg>
+      <figcaption><b>Figure 1.</b> Protocol overview. Port 61500 is bidirectional — control opcodes travel phone → device, JSON status and WEBP-encoded frames travel device → phone on the same port — while port 61501 carries a separate JPEG stream device → phone. No channel is encrypted, authenticated, or integrity-checked.</figcaption>
+    </figure>
+
+    <p>
+      The application manifest declares this posture explicitly rather than
+      leaving it implicit:
+    </p>
+    <blockquote class="vendor">
+      &lt;application android:usesCleartextTraffic="true" ... &gt;
+      <cite>AndroidManifest.xml, com.atomath.wifi_camera v1.3.1</cite>
+    </blockquote>
+    <p>
+      There is no TLS configuration to audit for weakness, because there is no
+      TLS. The threat model we evaluate against is therefore the simplest
+      possible one for a wireless device: an attacker with a commodity Wi-Fi
+      adapter in monitor mode, within radio range of either the camera or the
+      phone, with no prior credential and no physical access to either device.
+    </p>
+
+    <div class="tablewrap">
+    <table class="datatable">
+      <caption>Table 1 — Confirmed control opcodes, UDP/61500 (phone → device)</caption>
+      <thead><tr><th>Opcode</th><th>Length</th><th>Function</th></tr></thead>
+      <tbody>
+        <tr><td class="mono"><code>10 01</code></td><td class="mono">2 B</td><td>Metadata poll — device responds with JSON status</td></tr>
+        <tr><td class="mono"><code>10 02</code></td><td class="mono">2 B</td><td>Stream start request</td></tr>
+        <tr><td class="mono"><code>10 03</code></td><td class="mono">4 B</td><td>Periodic metadata poll</td></tr>
+        <tr><td class="mono"><code>10 04</code></td><td class="mono">786 B</td><td>OTA initiation — 16-byte header + raw firmware image (§4.4)</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- 3. METHODOLOGY -->
+  <section id="s3">
+    <h2><span class="num">3</span> Methodology</h2>
+    <p>All testing was performed against researcher-owned hardware in a researcher-controlled environment. No third-party device, network, or user was involved at any point.</p>
+    <ul class="plain">
+      <li><strong>Static analysis.</strong> The EarVision APK was decompiled and its manifest, bundled assets, and Java/Flutter platform bridge reviewed. This is where <code>usesCleartextTraffic="true"</code>, the three bundled firmware images, the MNN inference plugin, and the bundled TFLite model (<code>core.db</code>, 5.2&nbsp;MB, disguised with a non-standard extension) were located.</li>
+      <li><strong>Wireless capture.</strong> A wireless interface was placed in monitor mode and traffic between phone and camera captured across normal app usage — pairing, live viewing, still capture, and update checks.</li>
+      <li><strong>Protocol analysis.</strong> The two UDP channels were separated, the control opcodes on 61500 enumerated (Table 1), and the JSON status schema mapped field-by-field.</li>
+      <li><strong>Frame reconstruction.</strong> JPEG and WEBP frames were rebuilt from captured UDP payloads by locating frame boundaries and stripping the per-packet transport header, confirming the video is fully recoverable from a passive capture alone.</li>
+      <li><strong>Spoofing proof of concept.</strong> A rogue access point replicating the device's observed BLE and Wi-Fi identity was used to confirm the app accepts it as genuine, and that attacker-supplied version fields in the status JSON reliably produce the OTA prompt and subsequent firmware transfer.</li>
+    </ul>
+  </section>
+
+  <!-- 4. FINDINGS -->
+  <section id="s4">
+    <h2><span class="num">4</span> Findings</h2>
+    <p>Four CVEs were assigned under CERT/CC case VU#763563.<sup class="cite"><a href="#ref1">[1]</a></sup> They are presented below in the order used to brief CERT/CC — beginning with the passively-observable privacy failure, then the two findings that compose into a full man-in-the-middle position, then the finding that turns that position into arbitrary code execution.</p>
+
+    <div class="tablewrap">
+    <table class="datatable">
+      <caption>Table 2 — Summary of assigned CVEs</caption>
+      <thead><tr><th>CVE</th><th>Finding</th><th>CWE</th><th>CVSS 3.1 (est.)</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">2026-81330</td><td>Cleartext live video over UDP</td><td class="mono">CWE-319</td><td><span class="badge critical">Critical</span> <span class="mono">7.5</span></td></tr>
+        <tr><td class="mono">2026-81640</td><td>AP password derivable from broadcast BSSID</td><td class="mono">CWE-330, CWE-798</td><td><span class="badge high">High</span> <span class="mono">6.5</span></td></tr>
+        <tr><td class="mono">2026-82563</td><td>Device identity accepted from broadcast values, not cryptography</td><td class="mono">CWE-290</td><td><span class="badge critical">Critical</span> <span class="mono">8.8</span></td></tr>
+        <tr><td class="mono">2026-77974</td><td>Unauthenticated, unsigned OTA firmware transfer</td><td class="mono">CWE-306, CWE-494</td><td><span class="badge critical">Critical</span> <span class="mono">7.6</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <!-- 4.1 -->
+    <div class="finding">
+      <h3 class="ftitle"><span class="num">4.1</span> Cleartext Video Over UDP</h3>
+      <div class="idbar">
+        <span class="cveid">CVE-2026-81330</span>
+        <span class="badge critical">Critical</span>
+        <span class="cvss mono">CVSS 7.5 · AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</span>
+        <span class="cwe mono">CWE-319</span>
+      </div>
+      <p>
+        Video leaves the device as ordinary JPEG frames on UDP/61501 (an 8-byte
+        transport header followed by SOI/EOI-delimited JPEG data) and as WEBP
+        frames interleaved with JSON control traffic on UDP/61500. Neither
+        channel carries transport or application-layer encryption. Possession
+        of the AP password — which, per §4.2, requires no cracking — is the
+        only thing separating an observer from the video.
+      </p>
+      <p>
+        Frame reconstruction quality in our testing tracked capture quality
+        directly: packet loss surfaced as dropped frames rather than failure.
+        The attack degrades gracefully, which is the wrong property for a
+        confidentiality control to have. Recovery is entirely passive — the
+        camera cannot detect it, the app cannot detect it, and the user has no
+        indication it is occurring.
+      </p>
+    </div>
+
+    <!-- 4.2 -->
+    <div class="finding">
+      <h3 class="ftitle"><span class="num">4.2</span> Wi-Fi Password Derivable From a Public Value</h3>
+      <div class="idbar">
+        <span class="cveid">CVE-2026-81640</span>
+        <span class="badge high">High</span>
+        <span class="cvss mono">CVSS 6.5 · AV:A/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N</span>
+        <span class="cwe mono">CWE-330, CWE-798</span>
+      </div>
+      <p>
+        The C6's access-point password is unique per device rather than a
+        single value shared across the product line — an implementation choice
+        that, on its face, looks like the correct one. It is undermined by how
+        that per-device value is produced: it is algorithmically derivable from
+        the device's BSSID, which every C6 broadcasts in the clear, in every
+        beacon frame, several times a second, to anyone listening. A value that
+        is designed to be public cannot also function as the seed for a secret.
+      </p>
+      <p>
+        This sits between two CWE categories rather than squarely in one: the
+        credential is not literally hardcoded in firmware (CWE-798), but it is
+        fully and deterministically derived from a broadcast value, which
+        produces the same practical outcome as a hardcoded credential, by way
+        of insufficient entropy in the derivation (CWE-330). An attacker in
+        range reads the BSSID off the air and computes the key — no handshake
+        capture, no dictionary, no cracking time. CVE-2026-81330 follows
+        immediately.
+      </p>
+      <p>Consistent with §9, the derivation function itself is withheld.</p>
+    </div>
+
+    <!-- 4.3 -->
+    <div class="finding">
+      <h3 class="ftitle"><span class="num">4.3</span> Device Identity Accepted Without Cryptographic Proof</h3>
+      <div class="idbar">
+        <span class="cveid">CVE-2026-82563</span>
+        <span class="badge critical">Critical</span>
+        <span class="cvss mono">CVSS 8.8 · AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N</span>
+        <span class="cwe mono">CWE-290</span>
+      </div>
+      <p>
+        EarVision decides whether an endpoint is a genuine C6 using only
+        broadcast identifiers — the Wi-Fi SSID and a BLE advertisement identity
+        — rather than any cryptographic proof of possession. There is no device
+        certificate, no challenge-response, no shared secret proved over the
+        channel, and no signature on device responses. A microcontroller
+        (an ESP32, roughly five US dollars) that replicates the expected BLE
+        advertisement while hosting a matching SSID is accepted by the app as
+        the real device, including auto-join, because the phone already holds
+        the AP credential from a prior legitimate connection and §4.2 makes
+        that credential trivial to reproduce independently as well.
+      </p>
+      <p>
+        Once accepted, the rogue endpoint controls every field of every JSON
+        status response and every byte of every UDP/61500 reply — a full
+        man-in-the-middle position with no further work required. This is the
+        pivot into §4.4.
+      </p>
+    </div>
+
+    <!-- 4.4 -->
+    <div class="finding">
+      <h3 class="ftitle"><span class="num">4.4</span> Unauthenticated, Unsigned Firmware Update</h3>
+      <div class="idbar">
+        <span class="cveid">CVE-2026-77974</span>
+        <span class="badge critical">Critical</span>
+        <span class="cvss mono">CVSS 7.6 · AV:A/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:L</span>
+        <span class="cwe mono">CWE-306, CWE-494</span>
+      </div>
+      <p>
+        The C6 inverts the usual IoT firmware model: images are not fetched
+        by the device from a vendor server, they are bundled inside the
+        Android APK and pushed to the camera by the phone. Three images ship
+        in the app, one per chipset variant (Table 3). The update decision is
+        driven entirely by two device-reported fields in the status JSON:
+      </p>
+      <div class="tablewrap">
+      <table class="datatable">
+        <caption>Table 3 — Bundled firmware images (extracted from EarVision v1.3.1)</caption>
+        <thead><tr><th>File</th><th>Size</th><th>Chipset</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">bk7252n_251117.bin</td><td>616 KB</td><td>Beken BK7252N</td><td>RBL container (magic <code>52 42 4C 00</code>)</td></tr>
+          <tr><td class="mono">txw806_111.bin</td><td>368 KB</td><td>TXW806</td><td>version 111</td></tr>
+          <tr><td class="mono">txw810_125.bin</td><td>321 KB</td><td>TXW810</td><td>version 125</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>
+        If <code>ota_device_version</code> is reported greater than
+        <code>device_version</code>, EarVision presents an update prompt.
+        Nothing authenticates either field, and — following §4.3 — both arrive
+        over an unencrypted channel from an endpoint the app never
+        cryptographically verified. When the user accepts, the app transmits
+        the bundled image over UDP/61500 as opcode <code>10 04</code>:
+      </p>
+      <div class="tablewrap">
+      <table class="datatable">
+        <caption>Table 4 — Confirmed <code>10 04</code> OTA packet layout</caption>
+        <thead><tr><th>Offset</th><th>Length</th><th>Value observed</th><th>Field</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">0x00</td><td class="mono">2 B</td><td class="mono">10 04</td><td>OTA opcode</td></tr>
+          <tr><td class="mono">0x02</td><td class="mono">4 B</td><td class="mono">7D 00 00 00</td><td>Current device version (125, little-endian)</td></tr>
+          <tr><td class="mono">0x06</td><td class="mono">4 B</td><td class="mono">10 E6 04 00</td><td>Firmware size in bytes (321,040)</td></tr>
+          <tr><td class="mono">0x0A</td><td class="mono">2 B</td><td class="mono">00 00</td><td>Padding</td></tr>
+          <tr><td class="mono">0x0C</td><td class="mono">4 B</td><td class="mono">00 00 00 03</td><td>Partition / chip identifier</td></tr>
+          <tr><td class="mono">0x10</td><td class="mono">770 B</td><td class="mono">&lt;firmware&gt;</td><td>Raw <code>txw810_125.bin</code>, byte 0 onward</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>
+        We confirmed the transmitted payload is byte-for-byte identical to the
+        bundled asset — not merely similar — by comparing the packet body
+        against the extracted firmware file directly:
+      </p>
+      <div class="tablewrap">
+      <table class="datatable">
+        <caption>Table 5 — Byte-for-byte comparison, packet offset 0x10 vs. <code>txw810_125.bin</code> offset 0x00</caption>
+        <thead><tr><th>Source</th><th>First 32 bytes</th></tr></thead>
+        <tbody>
+          <tr><td>OTA packet (offset 0x10)</td><td class="mono">69 5A 00 1C 00 00 00 18 00 00 00 18 00 0C 00 00 …</td></tr>
+          <tr><td><code>txw810_125.bin</code> (offset 0x00)</td><td class="mono">69 5A 00 1C 00 00 00 18 00 00 00 18 00 0C 00 00 …</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>
+        No authentication guards the status channel that triggers the prompt
+        (CWE-306); no signature binds the image to the vendor (CWE-494); and
+        the firmware header itself confirms integrity checking is disabled at
+        the source, with <code>code_crc32 = 0x00000000</code> and
+        <code>head_crc16 = 0x0000</code>. The device acknowledged the transfer
+        (<code>ota_success: true</code>) in its status response; confirming
+        persistence across a power cycle would additionally require a physical
+        flash dump, which was out of scope for this disclosure. The
+        user-facing accept prompt is the only remaining gate, and it is
+        visually identical to the prompt a legitimate update produces — the
+        user cannot distinguish them because the app cannot.
+      </p>
+    </div>
+  </section>
+
+  <!-- 5. CHAIN -->
+  <section id="s5">
+    <h2><span class="num">5</span> The Composite Attack Chain</h2>
+    <p>
+      Individually, each finding above is a common IoT defect with numerous
+      public precedents (§6). Composed, they form one continuous escalation
+      from a completely passive starting point to arbitrary code execution on
+      the device, requiring exactly one moment of victim interaction at the
+      final step.
+    </p>
+    <figure>
+      <svg viewBox="0 0 640 430" role="img" aria-label="Attack chain diagram: reading a broadcast BSSID leads to deriving the Wi-Fi password (CVE-2026-81640), which branches into decrypting the video stream (CVE-2026-81330) and standing up a rogue access point accepted as the device (CVE-2026-82563), which in turn leads to a spoofed OTA prompt and unsigned firmware push (CVE-2026-77974).">
+        <defs>
+          <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <polygon points="0 0, 7 3, 0 6" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <rect x="210" y="8" width="220" height="52" rx="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+        <text x="320" y="30" text-anchor="middle" font-size="11.5" fill="currentColor" font-weight="600">802.11 beacon frame</text>
+        <text x="320" y="46" text-anchor="middle" font-size="10.5" fill="currentColor">BSSID — public, passive read</text>
+
+        <line x1="320" y1="60" x2="320" y2="92" stroke="currentColor" stroke-width="1.3" marker-end="url(#arrow2)"/>
+
+        <rect x="190" y="94" width="260" height="58" rx="4" fill="none" stroke="var(--accent)" stroke-width="1.8"/>
+        <text x="320" y="117" text-anchor="middle" font-size="11.5" fill="var(--accent)" font-weight="700">CVE-2026-81640</text>
+        <text x="320" y="133" text-anchor="middle" font-size="10.5" fill="currentColor">Derive WPA2 pre-shared key from BSSID</text>
+
+        <line x1="260" y1="152" x2="160" y2="192" stroke="currentColor" stroke-width="1.3" marker-end="url(#arrow2)"/>
+        <text x="175" y="172" text-anchor="middle" font-size="10" fill="currentColor">decrypt capture</text>
+
+        <line x1="380" y1="152" x2="470" y2="192" stroke="currentColor" stroke-width="1.3" marker-end="url(#arrow2)"/>
+        <text x="460" y="172" text-anchor="middle" font-size="10" fill="currentColor">stand up matching AP</text>
+
+        <rect x="20" y="196" width="270" height="66" rx="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+        <text x="155" y="219" text-anchor="middle" font-size="11.5" fill="currentColor" font-weight="600">CVE-2026-81330</text>
+        <text x="155" y="235" text-anchor="middle" font-size="10.5" fill="currentColor">Decrypt &amp; reassemble video</text>
+        <text x="155" y="250" text-anchor="middle" font-size="10" fill="var(--ink-faint)">no interaction required</text>
+
+        <rect x="350" y="196" width="270" height="66" rx="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+        <text x="485" y="219" text-anchor="middle" font-size="11.5" fill="currentColor" font-weight="600">CVE-2026-82563</text>
+        <text x="485" y="235" text-anchor="middle" font-size="10.5" fill="currentColor">Rogue AP accepted as the device</text>
+        <text x="485" y="250" text-anchor="middle" font-size="10" fill="var(--ink-faint)">full MitM position</text>
+
+        <line x1="485" y1="262" x2="485" y2="300" stroke="currentColor" stroke-width="1.3" marker-end="url(#arrow2)"/>
+        <text x="560" y="285" text-anchor="middle" font-size="10" fill="currentColor">serve fake ota_device_version</text>
+
+        <rect x="330" y="302" width="270" height="80" rx="4" fill="none" stroke="var(--critical)" stroke-width="1.6"/>
+        <text x="465" y="326" text-anchor="middle" font-size="11.5" fill="var(--critical)" font-weight="700">CVE-2026-77974</text>
+        <text x="465" y="342" text-anchor="middle" font-size="10.5" fill="currentColor">Spoofed status → OTA prompt →</text>
+        <text x="465" y="357" text-anchor="middle" font-size="10.5" fill="currentColor">unsigned firmware accepted</text>
+        <text x="465" y="372" text-anchor="middle" font-size="10" fill="var(--ink-faint)">one user tap</text>
+      </svg>
+      <figcaption><b>Figure 2.</b> The four findings as a single attack graph. The left branch (video interception) needs no user interaction at any point; the right branch (identity spoofing) converges on firmware push, which needs exactly one tap on a prompt visually indistinguishable from a legitimate update.</figcaption>
+    </figure>
+    <p>
+      Two properties of this chain are worth stating plainly. First, the
+      most severe outcome — arbitrary firmware execution — requires the least
+      technical sophistication of any step, because §4.2 and §4.3 do all the
+      work of getting the attacker into position; the final step is a JSON
+      field and a UDP send. Second, the video-interception branch (§4.1)
+      needs no chain at all — it is independently exploitable by anyone who
+      captures the AP handshake or derives the password, with zero
+      interaction with the app or its user.
+    </p>
+  </section>
+
+  <!-- 6. RELATED WORK -->
+  <section id="s6">
+    <h2><span class="num">6</span> Related Work</h2>
+    <p>
+      None of the four failure classes here are novel. Each has a well-known,
+      independently disclosed precedent, several in categories more consequential
+      than a novelty camera — which is precisely the point: this is not a
+      research problem, it is a pattern that keeps recurring because nothing in
+      the supply chain is accountable for fixing it (§10).
+    </p>
+    <div class="tablewrap">
+    <table class="datatable">
+      <caption>Table 6 — Comparable disclosed incidents by failure class</caption>
+      <thead><tr><th>Incident</th><th>Failure class</th><th>Parallel to</th></tr></thead>
+      <tbody>
+        <tr><td>Mirai botnet (2016)<sup class="cite"><a href="#ref8">[8]</a></sup></td><td>~62 hardcoded/derivable factory credentials on cheap DVRs and IP cameras</td><td>§4.2</td></tr>
+        <tr><td>Arlo cameras — predictable post-setup AP password<sup class="cite"><a href="#ref9">[9]</a></sup></td><td>Derivable/weak per-device Wi-Fi credential</td><td>§4.2</td></tr>
+        <tr><td>TP-Link Archer NX, CVE-2025-15517<sup class="cite"><a href="#ref10">[10]</a></sup></td><td>Missing auth check permitting unauthorized firmware upload</td><td>§4.4</td></tr>
+        <tr><td>Wyze Cam, CVE-2019-9564<sup class="cite"><a href="#ref11">[11]</a></sup></td><td>Auth-bypass camera takeover via spoofable device identity</td><td>§4.3</td></tr>
+        <tr><td>Hospira infusion pumps, CISA ICSA-15-125-01<sup class="cite"><a href="#ref12">[12]</a></sup></td><td>Unauthenticated, unsigned firmware accepted by a medical device</td><td>§4.4</td></tr>
+        <tr><td>St. Jude / Abbott cardiac devices, FDA recall 2017<sup class="cite"><a href="#ref13">[13]</a></sup></td><td>Weak/spoofable RF authentication on an implanted medical device</td><td>§4.3</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      The Hospira and St. Jude/Abbott cases are the closest analogs in
+      consequence class rather than device class: both are medical devices
+      where a missing authentication or integrity control on a wireless or
+      network-reachable update path became a patient-safety issue rather than
+      a privacy one. The C6 is not an infusion pump or a pacemaker, but it is
+      marketed into the same "device that touches a body, built to consumer
+      cost targets" category, with none of the design scrutiny those
+      categories eventually received after regulatory intervention.
+    </p>
+  </section>
+
+  <!-- 7. TIMELINE -->
+  <section id="s7">
+    <h2><span class="num">7</span> Coordinated Disclosure Timeline</h2>
+    <div class="tablewrap">
+    <table class="datatable">
+      <caption>Table 7 — Disclosure timeline</caption>
+      <thead><tr><th>Date</th><th>Event</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">May 2026</td><td>Initial discovery during static analysis of the EarVision APK</td></tr>
+        <tr><td class="mono">2026</td><td>Report submitted to CERT/CC; case opened as VU#763563</td></tr>
+        <tr><td class="mono">2 Sep 2026</td><td>CVE-2026-81330, -81640, -82563, and -77974 published</td></tr>
+        <tr><td class="mono">16 Sep 2026</td><td>This paper published</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      We attempted to identify a vendor security contact before proceeding
+      through CERT/CC. The manufacturer of record, Shenzhen Jiding Electronics
+      Co., Ltd., could be identified from the app's bundled privacy policy, but
+      that document lists only a generic, personal-provider email address for
+      privacy-policy questions — not a security contact, not tied to a
+      published disclosure process, and not confidence-inspiring as a channel
+      for a report of this severity. No <code>security.txt</code>, no
+      dedicated vulnerability-disclosure page, and no security address appear
+      on any storefront or documentation associated with the product or its
+      white-label variants. This is the ordinary condition for this class of
+      hardware, and it is the reason coordination proceeded through CERT/CC
+      rather than direct vendor contact.
+    </p>
+  </section>
+
+  <!-- 8. RECOMMENDATIONS -->
+  <section id="s8">
+    <h2><span class="num">8</span> Recommendations</h2>
+
+    <h3><span class="num">8.1</span> For owners of this device</h3>
+    <p>There is no patch to apply. The practical guidance is accordingly short:</p>
+    <ul class="checklist">
+      <li>Treat any footage the device captures as though it were broadcast publicly, because in effect it is.</li>
+      <li>Power the device on only for the duration of an actual use; the access point is live for as long as the device is on.</li>
+      <li>Do not use it anywhere you would not accept a stranger in range watching the feed.</li>
+      <li>Decline firmware update prompts unless you have specific reason to trust them — you have no way to verify one, and that is the point of §4.4.</li>
+      <li>For anything that will inform a medical decision, particularly for a child, use a clinician instead of this device.</li>
+    </ul>
+
+    <h3><span class="num">8.2</span> For vendors building this class of device</h3>
+    <p>Every issue in this paper has a decades-old, well-understood remedy. None require novel research.</p>
+    <ul class="plain">
+      <li><strong>Encrypt the media channel.</strong> DTLS or SRTP over the existing UDP transport; the frames are already framed, so wrapping them is not a redesign.</li>
+      <li><strong>Authenticate the device cryptographically.</strong> Provision a per-device key or certificate at manufacture and prove possession over the channel — an SSID is an identifier, not an authenticator.</li>
+      <li><strong>Generate AP credentials from real entropy.</strong> A random per-device password printed on the unit or its packaging is simultaneously more secure and easier to implement than any derivation function.</li>
+      <li><strong>Sign firmware and verify on-device.</strong> A bootloader check against a key burned into hardware at manufacture is the single control that would have neutralized §4.4 regardless of every other finding.</li>
+      <li><strong>Do not trust device-reported state for security decisions.</strong> An unauthenticated endpoint claiming it needs an update is not evidence that it does.</li>
+      <li><strong>Publish a security contact.</strong> A monitored address and a <code>security.txt</code> file cost nothing.</li>
+    </ul>
+    <p>
+      These recommendations track the baseline technical controls in NIST IR
+      8259A<sup class="cite"><a href="#ref14">[14]</a></sup> — device identification, secure
+      configuration, data protection, and a signed software/firmware update
+      mechanism — and the criteria behind the U.S. Cyber Trust Mark program
+      defined in NIST IR 8425<sup class="cite"><a href="#ref15">[15]</a></sup>, neither of
+      which this product meets on any axis we tested. CISA's IoT acquisition
+      guidance is a useful procurement-stage checklist for buyers of this
+      device class more broadly.<sup class="cite"><a href="#ref16">[16]</a></sup>
+    </p>
+  </section>
+
+  <!-- 9. ETHICS -->
+  <section id="s9">
+    <h2><span class="num">9</span> Exploit-Code &amp; Ethics Statement</h2>
+    <div class="ethics">
+      <span class="label">Withheld by policy</span>
+      <p>
+        We are not publishing the BSSID-to-password derivation routine, the
+        rogue access point implementation, or tooling to reconstruct video from
+        a capture file. The affected behavior is described in this paper in
+        enough technical detail for defenders, researchers, and anyone in the
+        supply chain to understand and act on it, without shipping a working
+        attack toolkit against an unpatchable device that has an unknown but
+        non-trivial number of units already in homes. There is no automatic
+        update path and no vendor security contact through which a fix could
+        be distributed even if one existed; publishing working tooling in that
+        position would harm current owners without meaningfully advancing
+        anyone's understanding beyond what §4 already provides. Researchers
+        who require additional technical detail for defensive or coordination
+        purposes may request it through the contact channel on our
+        organization's website.
+      </p>
+    </div>
+  </section>
+
+  <!-- 10. DISCUSSION -->
+  <section id="s10">
+    <h2><span class="num">10</span> Discussion: A Broader Pattern</h2>
+    <p>
+      Cheap white-label IoT hardware is a large and growing share of the
+      devices in people's homes, built on reference designs that are copied
+      across unrelated product lines with the security posture intact —
+      meaning absent. The chipsets in this device, Beken and TXW parts, appear
+      across a wide range of consumer electronics; the design failures
+      documented here are not specific to ear cameras, and Table 6 shows the
+      same four failure classes recurring from fifteen-dollar DVRs up through
+      FDA-recalled implanted medical devices.
+    </p>
+    <p>
+      What makes this particular case worth publishing is the gap between the
+      sensitivity of the data and the effort spent protecting it. The product
+      ships an on-device neural network for image processing — someone spent
+      real engineering time on the imaging pipeline. The video that pipeline
+      produces goes out over the air in the clear, protected by a password
+      printed in every beacon frame. That is not a resource constraint; it is
+      a priorities problem, and the predictable outcome when no party in a
+      supply chain — OEM, brand, reseller, or app developer — is accountable
+      for security, and no regulation currently forces the question for a
+      device in this category.
+    </p>
+  </section>
+
+  <!-- 11. CONCLUSION -->
+  <section id="s11">
+    <h2><span class="num">11</span> Conclusion</h2>
+    <p>
+      Four independently unremarkable IoT defects, chained, let anyone within
+      radio range of a Softish C6 watch its video feed, impersonate it to its
+      own companion app, and push it unsigned firmware — with a total
+      interaction cost, at the worst step, of one tap. The device's threat
+      model, to the extent one exists, rests entirely on the assumption that
+      nobody nearby is listening to public radio broadcasts. That assumption
+      fails for a fifteen-dollar Wi-Fi adapter, and it fails for a device that
+      is, by design, pointed inside a human body.
+    </p>
+  </section>
+
+  <section>
+    <h2 style="border-bottom:none;">Acknowledgments</h2>
+    <p>We thank CERT/CC for coordination under VU#763563 in the continued absence of a responsive vendor security contact.</p>
+  </section>
+
+  <section id="refs">
+    <h2 style="border-bottom:none;">References</h2>
+    <ol class="refs">
+      <li id="ref1">CERT/CC. VU#763563. <a href="https://kb.cert.org/vuls/id/763563" target="_blank" rel="noopener">kb.cert.org/vuls/id/763563</a></li>
+      <li id="ref8">Krebs, B. "Source Code for IoT Botnet 'Mirai' Released." <em>Krebs on Security</em>, 2016. <a href="https://krebsonsecurity.com/2016/10/source-code-for-iot-botnet-mirai-released/" target="_blank" rel="noopener">krebsonsecurity.com</a></li>
+      <li id="ref9">Arlo. "Arlo Wi-Fi Default Password Security Vulnerability." Support advisory. <a href="https://www.arlo.com/en_eu/support/faq/30731/Arlo-WiFi-Default-Password-Security-Vulnerability" target="_blank" rel="noopener">arlo.com</a></li>
+      <li id="ref10">"Patch Now: TP-Link Archer NX Routers Vulnerable to Firmware Takeover." <em>Security Affairs</em>, 2025. CVE-2025-15517. <a href="https://securityaffairs.com/189980/iot/patch-now-tp-link-archer-nx-routers-vulnerable-to-firmware-takeover.html" target="_blank" rel="noopener">securityaffairs.com</a></li>
+      <li id="ref11">"Wyze Cam Flaw Lets Hackers Remotely Access Your Saved Videos." <em>BleepingComputer</em>. CVE-2019-9564. <a href="https://www.bleepingcomputer.com/news/security/wyze-cam-flaw-lets-hackers-remotely-access-your-saved-videos/amp/" target="_blank" rel="noopener">bleepingcomputer.com</a></li>
+      <li id="ref12">CISA. ICSA-15-125-01B — Hospira Infusion Pump Vulnerabilities. <a href="https://www.cisa.gov/news-events/ics-advisories/icsa-15-125-01b" target="_blank" rel="noopener">cisa.gov</a></li>
+      <li id="ref13">"St. Jude Medical Recalls 465,000 Pacemakers Over Security Vulnerabilities." <em>SecurityWeek</em>, 2017. <a href="https://www.securityweek.com/st-jude-medical-recalls-465000-pacemakers-over-security-vulnerabilities/" target="_blank" rel="noopener">securityweek.com</a></li>
+      <li id="ref14">NIST. IR 8259A — IoT Device Cybersecurity Capability Core Baseline. <a href="https://pages.nist.gov/FederalProfile-8259A/" target="_blank" rel="noopener">pages.nist.gov</a></li>
+      <li id="ref15">NIST. IR 8425 — technical baseline for the FCC Cyber Trust Mark. <a href="https://www.fcc.gov/CyberTrustMark" target="_blank" rel="noopener">fcc.gov/CyberTrustMark</a></li>
+      <li id="ref16">CISA. IoT Acquisition Guidance for Organizations. <a href="https://www.cisa.gov/sites/default/files/publications/20_0204_cisa_sed_internet_of_things_acquisition_guidance_final_508_0.pdf" target="_blank" rel="noopener">cisa.gov (PDF)</a></li>
+    </ol>
+  </section>
+
+  <div class="colophon">
+    <span>Softish C6 / EarVision — CERT/CC VU#763563</span>
+    <span>Vexel Foundation — Matthew Dubbrin</span>
+    <span>v1.0 · 16 Sep 2026</span>
+  </div>
+
+</article>
+</body>
+</html>
