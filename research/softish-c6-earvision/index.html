@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How I Became the First Person to Publish a Vulnerability in an Earwax Cleaner — Matthew Dubbrin</title>
-<meta name="description" content="Four chained CVEs (CISA CSAF Advisory VA-26-251-01) in the Softish C6 ear camera and EarVision app.">
+<meta name="description" content="Four chained CVEs, coordinated through CISA, in the Softish C6 ear camera and EarVision app.">
 <link rel="stylesheet" href="../../assets/site.css">
 </head>
 <body>
@@ -24,7 +24,7 @@
 <main class="wrap">
 <article class="prose">
 
-  <span class="meta">Case Study &middot; CISA CSAF VA-26-251-01 &middot; 4 CVEs</span>
+  <span class="meta">Case Study &middot; CISA (advisory pending) &middot; 4 CVEs</span>
   <h1 style="margin-top:.6rem;">How I Became the First Person to Publish a Vulnerability in an Earwax Cleaner</h1>
   <p class="tagline" style="font-style:italic; margin-bottom:1rem;">Four chained vulnerabilities in a consumer otoscope camera and its companion Android application</p>
   <div class="byline">
@@ -53,7 +53,8 @@
       this chain is materially worse than the median IoT camera disclosure because
       the data in transit is medical-adjacent, frequently depicts a minor, and
       because no accountable vendor security contact could be established for the
-      product. All four issues were coordinated through CISA under CSAF Advisory VA-26-251-01.
+      product. All four issues were coordinated through CISA; its advisory
+      was still pending publication as of this writing.
       Consistent with our exploit-code policy (§9), we withhold the credential
       derivation routine, rogue-access-point implementation, and video
       reconstruction tooling.
@@ -78,7 +79,7 @@
       <tr><td>Firmware variants</td><td><code>bk7252n_251117</code> (Beken BK7252N) &middot; <code>txw806_111</code> (TXW806) &middot; <code>txw810_125</code> (TXW810)</td></tr>
       <tr><td>Attacker position</td><td>Passive or active Wi-Fi range of the device or the paired phone</td></tr>
       <tr><td>Required interaction</td><td>None for video interception or credential recovery; one prompt tap for the firmware-push stage</td></tr>
-      <tr><td>Coordination</td><td>CISA, CSAF Advisory VA-26-251-01 — CVEs published 2 September 2026</td></tr>
+      <tr><td>Coordination</td><td>CISA (advisory pending publication) — CVEs published 2 September 2026</td></tr>
     </table>
   </div>
 
@@ -229,7 +230,7 @@
   <!-- 4. FINDINGS -->
   <section id="s4">
     <h2><span class="num">4</span> Findings</h2>
-    <p>Four CVEs were assigned, documented in CISA CSAF Advisory VA-26-251-01.<sup><a href="#ref1">[1]</a></sup> They are presented below in the order used to brief the coordinating body — beginning with the passively-observable privacy failure, then the two findings that compose into a full man-in-the-middle position, then the finding that turns that position into arbitrary code execution.</p>
+    <p>Four CVEs were assigned, coordinated through CISA.<sup><a href="#ref1">[1]</a></sup> They are presented below in the order used to brief the coordinating body — beginning with the passively-observable privacy failure, then the two findings that compose into a full man-in-the-middle position, then the finding that turns that position into arbitrary code execution.</p>
 
     <div class="table-wrap">
     <table class="data">
@@ -509,12 +510,17 @@
       <thead><tr><th>Date</th><th>Event</th></tr></thead>
       <tbody>
         <tr><td>May 2026</td><td>Initial discovery during static analysis of the EarVision APK</td></tr>
-        <tr><td>2026</td><td>Report submitted to CISA; published as CSAF Advisory VA-26-251-01</td></tr>
+        <tr><td>2026</td><td>Report submitted to CISA; advisory pending publication</td></tr>
         <tr><td>2 Sep 2026</td><td>CVE-2026-81330, -81640, -82563, and -77974 published</td></tr>
         <tr><td>16 Sep 2026</td><td>This paper published</td></tr>
       </tbody>
     </table>
     </div>
+    <p>
+      CISA's advisory for this coordination had not yet been published as of
+      this writing. Its CSAF advisory ID will be added throughout this paper
+      once it goes live.
+    </p>
     <p>
       We attempted to identify a vendor security contact before proceeding
       through CISA. The manufacturer of record, Shenzhen Jiding Electronics
@@ -635,13 +641,13 @@
 
   <section>
     <h2 style="border-bottom:none;">Acknowledgments</h2>
-    <p>We thank CISA for coordination and for publishing CSAF Advisory VA-26-251-01 in the continued absence of a responsive vendor security contact.</p>
+    <p>We thank CISA for coordination in the continued absence of a responsive vendor security contact.</p>
   </section>
 
   <section id="refs">
     <h2 style="border-bottom:none;">References</h2>
     <ol class="refs">
-      <li id="ref1">CISA. CSAF Advisory VA-26-251-01.</li>
+      <li id="ref1">CISA. Advisory pending publication.</li>
       <li id="ref8">Krebs, B. "Source Code for IoT Botnet 'Mirai' Released." <em>Krebs on Security</em>, 2016. <a href="https://krebsonsecurity.com/2016/10/source-code-for-iot-botnet-mirai-released/" target="_blank" rel="noopener">krebsonsecurity.com</a></li>
       <li id="ref9">Arlo. "Arlo Wi-Fi Default Password Security Vulnerability." Support advisory. <a href="https://www.arlo.com/en_eu/support/faq/30731/Arlo-WiFi-Default-Password-Security-Vulnerability" target="_blank" rel="noopener">arlo.com</a></li>
       <li id="ref10">"Patch Now: TP-Link Archer NX Routers Vulnerable to Firmware Takeover." <em>Security Affairs</em>, 2025. CVE-2025-15517. <a href="https://securityaffairs.com/189980/iot/patch-now-tp-link-archer-nx-routers-vulnerable-to-firmware-takeover.html" target="_blank" rel="noopener">securityaffairs.com</a></li>
@@ -655,7 +661,7 @@
   </section>
 
   <div class="colophon">
-    <span>Softish C6 / EarVision — CISA CSAF VA-26-251-01</span>
+    <span>Softish C6 / EarVision — CISA (advisory pending)</span>
     <span>Vexel Foundation — Matthew Dubbrin</span>
     <span>v2.0 · 16 Sep 2026</span>
   </div>
