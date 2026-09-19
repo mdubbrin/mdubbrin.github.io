@@ -38,7 +38,7 @@
     <p>
       The Softish C6 is a consumer ear-canal camera, sold under multiple white-label
       brand names and controlled by an Android application, EarVision, over a
-      device-hosted Wi-Fi access point. We present four vulnerabilities discovered
+      device-hosted Wi-Fi access point. I present four vulnerabilities discovered
       through static analysis of the companion application and passive wireless
       capture of the device's control and video protocol: cleartext transmission of
       live video (CVE-2026-81330), an access-point credential algorithmically
@@ -49,13 +49,13 @@
       defect. Composed, they form a single passive-to-active chain: an attacker who
       only reads beacon frames can recover the Wi-Fi credential, decrypt the video
       feed, impersonate the device to the application, and — with one user
-      tap — deliver an arbitrary firmware image with no signature check. We argue
+      tap — deliver an arbitrary firmware image with no signature check. I argue
       this chain is materially worse than the median IoT camera disclosure because
       the data in transit is medical-adjacent, frequently depicts a minor, and
       because no accountable vendor security contact could be established for the
       product. All four issues were coordinated through CISA; its advisory
       was still pending publication as of this writing.
-      Consistent with our exploit-code policy (§9), we withhold the credential
+      Consistent with my exploit-code policy (§9), I withhold the credential
       derivation routine, rogue-access-point implementation, and video
       reconstruction tooling.
     </p>
@@ -115,8 +115,8 @@
       difficulty documented in §7.
     </p>
     <p>
-      We treat this device as a case study rather than an isolated finding
-      because the four vulnerabilities we identified do not fail independently.
+      I treat this device as a case study rather than an isolated finding
+      because the four vulnerabilities I identified do not fail independently.
       Each removes one control from the same trust boundary — transport,
       credential, identity, and integrity, in that order — and each failure
       makes the next one easier to reach. §5 formalizes this as a single
@@ -130,8 +130,8 @@
       the sensitivity of the data in transit. The footage is ear-canal anatomy,
       eardrum condition, and any hearing-assistive hardware the subject wears; the
       product is marketed to parents as a way to check a child's ear at home
-      rather than book a clinician visit. We return to this point directly in §10,
-      but it motivates the severity framing used throughout this paper: we treat
+      rather than book a clinician visit. I return to this point directly in §10,
+      but it motivates the severity framing used throughout this paper: I treat
       confidentiality of the video channel as the anchor harm, not an
       afterthought to the firmware-integrity finding.
     </p>
@@ -194,7 +194,7 @@
     </blockquote>
     <p>
       There is no TLS configuration to audit for weakness, because there is no
-      TLS. The threat model we evaluate against is therefore the simplest
+      TLS. The threat model I evaluate against is therefore the simplest
       possible one for a wireless device: an attacker with a commodity Wi-Fi
       adapter in monitor mode, within radio range of either the camera or the
       phone, with no prior credential and no physical access to either device.
@@ -245,7 +245,7 @@
     </table>
     </div>
 
-    <p>Scores and CWEs above are the official values from the published CVE records, which superseded our pre-publication self-assessments. None of the four reach the Critical band (9.0+) under standard CVSS v3.1 thresholds, and CVE-2026-81640 carries the highest score of the four despite reading as the quieter, enabling step in the narrative below.</p>
+    <p>Scores and CWEs above are the official values from the published CVE records, which superseded my pre-publication self-assessments. None of the four reach the Critical band (9.0+) under standard CVSS v3.1 thresholds, and CVE-2026-81640 carries the highest score of the four despite reading as the quieter, enabling step in the narrative below.</p>
 
     <!-- 4.1 -->
     <div style="margin-top:2.4rem; padding-top:1.6rem; border-top:1px dotted var(--rule);">
@@ -260,7 +260,7 @@
         only thing separating an observer from the video.
       </p>
       <p>
-        Frame reconstruction quality in our testing tracked capture quality
+        Frame reconstruction quality in my testing tracked capture quality
         directly: packet loss surfaced as dropped frames rather than failure.
         The attack degrades gracefully, which is the wrong property for a
         confidentiality control to have. Recovery is entirely passive — the
@@ -362,7 +362,7 @@
       </table>
       </div>
       <p>
-        We confirmed the transmitted payload is byte-for-byte identical to the
+        I confirmed the transmitted payload is byte-for-byte identical to the
         bundled asset — not merely similar — by comparing the packet body
         against the extracted firmware file directly:
       </p>
@@ -522,7 +522,7 @@
       once it goes live.
     </p>
     <p>
-      We attempted to identify a vendor security contact before proceeding
+      I attempted to identify a vendor security contact before proceeding
       through CISA. The manufacturer of record, Shenzhen Jiding Electronics
       Co., Ltd., could be identified from the app's bundled privacy policy, but
       that document lists only a generic, personal-provider email address for
@@ -567,7 +567,7 @@
       configuration, data protection, and a signed software/firmware update
       mechanism — and the criteria behind the U.S. Cyber Trust Mark program
       defined in NIST IR 8425<sup><a href="#ref15">[15]</a></sup>, neither of
-      which this product meets on any axis we tested. CISA's IoT acquisition
+      which this product meets on any axis I tested. CISA's IoT acquisition
       guidance is a useful procurement-stage checklist for buyers of this
       device class more broadly.<sup><a href="#ref16">[16]</a></sup>
     </p>
@@ -579,7 +579,7 @@
     <div class="callout warn">
       <span class="label">Withheld by policy</span>
       <p>
-        We are not publishing the BSSID-to-password derivation routine, the
+        I am not publishing the BSSID-to-password derivation routine, the
         rogue access point implementation, or tooling to reconstruct video from
         a capture file. The affected behavior is described in this paper in
         enough technical detail for defenders, researchers, and anyone in the
@@ -591,8 +591,8 @@
         position would harm current owners without meaningfully advancing
         anyone's understanding beyond what §4 already provides. Researchers
         who require additional technical detail for defensive or coordination
-        purposes may request it through the contact channel on our
-        organization's website.
+        purposes may request it by contacting me directly at
+        <a href="mailto:mdubbrin@gmail.com">mdubbrin@gmail.com</a>.
       </p>
     </div>
   </section>
@@ -641,7 +641,7 @@
 
   <section>
     <h2 style="border-bottom:none;">Acknowledgments</h2>
-    <p>We thank CISA for coordination in the continued absence of a responsive vendor security contact.</p>
+    <p>I thank CISA for coordination in the continued absence of a responsive vendor security contact.</p>
   </section>
 
   <section id="refs">
