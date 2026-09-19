@@ -235,22 +235,22 @@
     <div class="table-wrap">
     <table class="data">
       <caption>Table 2 — Summary of assigned CVEs</caption>
-      <thead><tr><th>CVE</th><th>Finding</th><th>CWE</th><th>CVSS 3.1</th></tr></thead>
+      <thead><tr><th>CVE</th><th>Finding</th><th>CWE</th><th>CVSS 4.0</th></tr></thead>
       <tbody>
-        <tr><td>2026-81330</td><td>Cleartext live video over UDP</td><td>CWE-319</td><td><span class="badge medium">Medium</span> 6.5</td></tr>
-        <tr><td>2026-81640</td><td>AP password derivable from broadcast BSSID</td><td>CWE-798</td><td><span class="badge high">High</span> 8.8</td></tr>
-        <tr><td>2026-82563</td><td>Device identity accepted from broadcast values, not cryptography</td><td>CWE-290</td><td><span class="badge high">High</span> 7.6</td></tr>
-        <tr><td>2026-77974</td><td>Unauthenticated, unsigned OTA firmware transfer</td><td>CWE-306</td><td><span class="badge high">High</span> 8.0</td></tr>
+        <tr><td>2026-81330</td><td>Cleartext live video over UDP</td><td>CWE-319</td><td><span class="badge high">High</span> 7.1</td></tr>
+        <tr><td>2026-81640</td><td>AP password derivable from broadcast BSSID</td><td>CWE-798</td><td><span class="badge high">High</span> 8.7</td></tr>
+        <tr><td>2026-82563</td><td>Device identity accepted from broadcast values, not cryptography</td><td>CWE-290</td><td><span class="badge high">High</span> 8.4</td></tr>
+        <tr><td>2026-77974</td><td>Unauthenticated, unsigned OTA firmware transfer</td><td>CWE-306</td><td><span class="badge high">High</span> 8.5</td></tr>
       </tbody>
     </table>
     </div>
 
-    <p>Scores and CWEs above are the official values from the published CVE records, which superseded my pre-publication self-assessments. None of the four reach the Critical band (9.0+) under standard CVSS v3.1 thresholds, and CVE-2026-81640 carries the highest score of the four despite reading as the quieter, enabling step in the narrative below.</p>
+    <p>Scores and CWEs above are the official values from the published CVE records, rated under CVSS v4.0. All four fall in the High band (7.0&ndash;8.9); none reach Critical (9.0+). CVE-2026-81640 carries the highest score of the four despite reading as the quieter, enabling step in the narrative below.</p>
 
     <!-- 4.1 -->
     <div style="margin-top:2.4rem; padding-top:1.6rem; border-top:1px dotted var(--rule);">
       <h3 style="margin-top:0; font-size:1.2rem;"><span class="num">4.1</span> Cleartext Video Over UDP</h3>
-      <p class="meta" style="margin-bottom:.85rem;">CVE-2026-81330 &middot; <span class="badge medium">Medium</span> &middot; CVSS 6.5 &middot; CWE-319</p>
+      <p class="meta" style="margin-bottom:.85rem;">CVE-2026-81330 &middot; <span class="badge high">High</span> &middot; CVSS 4.0: 7.1 &middot; CWE-319</p>
       <p>
         Video leaves the device as ordinary JPEG frames on UDP/61501 (an 8-byte
         transport header followed by SOI/EOI-delimited JPEG data) and as WEBP
@@ -272,7 +272,7 @@
     <!-- 4.2 -->
     <div style="margin-top:2.4rem; padding-top:1.6rem; border-top:1px dotted var(--rule);">
       <h3 style="margin-top:0; font-size:1.2rem;"><span class="num">4.2</span> Wi-Fi Password Derivable From a Public Value</h3>
-      <p class="meta" style="margin-bottom:.85rem;">CVE-2026-81640 &middot; <span class="badge high">High</span> &middot; CVSS 8.8 (highest of the four) &middot; CWE-798</p>
+      <p class="meta" style="margin-bottom:.85rem;">CVE-2026-81640 &middot; <span class="badge high">High</span> &middot; CVSS 4.0: 8.7 (highest of the four) &middot; CWE-798</p>
       <p>
         The C6's access-point password is unique per device rather than a
         single value shared across the product line — an implementation choice
@@ -296,7 +296,7 @@
     <!-- 4.3 -->
     <div style="margin-top:2.4rem; padding-top:1.6rem; border-top:1px dotted var(--rule);">
       <h3 style="margin-top:0; font-size:1.2rem;"><span class="num">4.3</span> Device Identity Accepted Without Cryptographic Proof</h3>
-      <p class="meta" style="margin-bottom:.85rem;">CVE-2026-82563 &middot; <span class="badge high">High</span> &middot; CVSS 7.6 &middot; CWE-290</p>
+      <p class="meta" style="margin-bottom:.85rem;">CVE-2026-82563 &middot; <span class="badge high">High</span> &middot; CVSS 4.0: 8.4 &middot; CWE-290</p>
       <p>
         EarVision decides whether an endpoint is a genuine C6 using only
         broadcast identifiers, the Wi-Fi SSID and a BLE advertisement identity,
@@ -320,7 +320,7 @@
     <!-- 4.4 -->
     <div style="margin-top:2.4rem; padding-top:1.6rem; border-top:1px dotted var(--rule);">
       <h3 style="margin-top:0; font-size:1.2rem;"><span class="num">4.4</span> Unauthenticated, Unsigned Firmware Update</h3>
-      <p class="meta" style="margin-bottom:.85rem;">CVE-2026-77974 &middot; <span class="badge high">High</span> &middot; CVSS 8.0 &middot; CWE-306</p>
+      <p class="meta" style="margin-bottom:.85rem;">CVE-2026-77974 &middot; <span class="badge high">High</span> &middot; CVSS 4.0: 8.5 &middot; CWE-306</p>
       <p>
         The C6 inverts the usual IoT firmware model: images are not fetched
         by the device from a vendor server, they are bundled inside the
