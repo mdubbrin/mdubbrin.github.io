@@ -146,7 +146,7 @@
       associates to the camera's SSID (of the form <code>softish-XXXXXX</code>,
       where the suffix is derived from the device's BSSID), and the app speaks
       to the device directly over two UDP ports. There is no broker, no cloud
-      relay, and — outside of the firmware images bundled in the APK itself —
+      relay, and, outside of the firmware images bundled in the APK itself,
       no external infrastructure involved in normal operation at all.
     </p>
 
@@ -263,7 +263,7 @@
         Frame reconstruction quality in my testing tracked capture quality
         directly: packet loss surfaced as dropped frames rather than failure.
         The attack degrades gracefully, which is the wrong property for a
-        confidentiality control to have. Recovery is entirely passive — the
+        confidentiality control to have. Recovery is entirely passive, the
         camera cannot detect it, the app cannot detect it, and the user has no
         indication it is occurring.
       </p>
@@ -299,11 +299,11 @@
       <p class="meta" style="margin-bottom:.85rem;">CVE-2026-82563 &middot; <span class="badge high">High</span> &middot; CVSS 7.6 &middot; CWE-290</p>
       <p>
         EarVision decides whether an endpoint is a genuine C6 using only
-        broadcast identifiers — the Wi-Fi SSID and a BLE advertisement identity
-        — rather than any cryptographic proof of possession. There is no device
+        broadcast identifiers, the Wi-Fi SSID and a BLE advertisement identity,
+        rather than any cryptographic proof of possession. There is no device
         certificate, no challenge-response, no shared secret proved over the
         channel, and no signature on device responses. A microcontroller
-        (an ESP32, roughly five US dollars) that replicates the expected BLE
+        (an ESP32, roughly $5) that replicates the expected BLE
         advertisement while hosting a matching SSID is accepted by the app as
         the real device, including auto-join, because the phone already holds
         the AP credential from a prior legitimate connection and §4.2 makes
